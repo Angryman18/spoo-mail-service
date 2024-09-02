@@ -15,9 +15,13 @@ type Server struct {
 }
 
 func main() {
-	LoadEnv()
+	err := LoadEnv()
+	if err != nil {
+		panic("Error Loading Environment Variables")
+	}
 	port := os.Getenv("PORT")
 	host := os.Getenv("HOST")
+
 	connStr := fmt.Sprintf("%s:%s", host, port)
 
 	listener, err := net.Listen("tcp", connStr)
@@ -26,7 +30,7 @@ func main() {
 	}
 	defer listener.Close()
 
-	fmt.Printf("Server has started at %s", connStr)
+	fmt.Printf("Server has started at %s\n", connStr)
 	conn, err := listener.Accept()
 
 	if err != nil {
@@ -53,7 +57,11 @@ func (s *Server) loop() {
 	conn := s.Conn
 	for {
 		fmt.Println("Connected to ", conn.RemoteAddr().String()+"\n")
-		conn.Read(data)
+		_, err := conn.Read(data)
+		if err != nil {
+			fmt.Println("Connection Closed")
+			return
+		}
 		go s.handler(&data)
 	}
 }

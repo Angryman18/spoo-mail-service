@@ -1,16 +1,31 @@
-FROM golang:1.23
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum .env ./
+COPY . ./
 RUN go mod download
-COPY *.go ./
 
-RUN go build -o mailservice
+RUN echo "BEFORE BUILD ---->" && ls -a
 
-RUN ls -a
+RUN go build -o mailservice .
+
+# FINAL CONTAINER
+
+FROM ubuntu:latest
+
+WORKDIR /app
+
+RUN ls -l
+
+COPY --from=builder /app/mailservice /app/mailservice
+COPY --from=builder /app/.env /app/.env
+
+RUN ls -l
+# RUN chmod +x mailservice
+
+RUN pwd
 
 EXPOSE 3000
 
-
 CMD ["./mailservice"]
+
