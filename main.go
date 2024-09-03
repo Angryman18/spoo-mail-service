@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net"
@@ -31,16 +32,18 @@ func main() {
 	defer listener.Close()
 
 	fmt.Printf("Server has started at %s\n", connStr)
-	conn, err := listener.Accept()
 
-	if err != nil {
-		log.Fatal("Error Accepting Connection ", err)
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Error Accepting Connection ", err)
+			continue
+		}
+
+		server := Server{Conn: conn}
+
+		go server.loop()
 	}
-
-	server := Server{Conn: conn}
-
-	server.loop()
-	fmt.Println("Server has started")
 
 }
 
@@ -53,11 +56,13 @@ func Includes(d, cmd string) bool {
 }
 
 func (s *Server) loop() {
-	data := make([]byte, 10)
+	// data := make([]byte, 10)
 	conn := s.Conn
 	for {
 		fmt.Println("Connected to ", conn.RemoteAddr().String()+"\n")
-		_, err := conn.Read(data)
+		info := bufio.NewReader(conn)
+		data, err := info.ReadString('\n')
+		// _, err := conn.Read(data)
 		conn.Write([]byte("WELCOME TO SMTP SERVER"))
 		if err != nil {
 			fmt.Println("Connection Closed")
@@ -67,7 +72,7 @@ func (s *Server) loop() {
 	}
 }
 
-func (s *Server) handler(data *[]byte) {
+func (s *Server) handler(data *string) {
 	str := string(*data)
 	fmt.Println(str)
 	switch {
@@ -82,6 +87,6 @@ func (s *Server) handler(data *[]byte) {
 	case Includes(str, "QUIT"):
 		s.Conn.Write([]byte("221 Bye\r\n"))
 	default:
-
+		fmt.Println("Default")
 	}
 }
