@@ -76,8 +76,10 @@ func (s *Server) handler(data *string, reader *bufio.Reader) {
 	str := string(*data)
 	fmt.Println("---> ", str)
 	switch {
-	case Includes(str, "HELO"):
-		s.Conn.Write([]byte("250 HELO\r\n"))
+	case Includes(str, "HELO") || Includes(str, "helo"):
+		s.Conn.Write([]byte("250 OK\r\n"))
+	case Includes(str, "EHLO") || Includes(str, "ehlo"):
+		s.Conn.Write([]byte("250 OK\r\n"))
 	case Includes(str, "MAIL FROM"):
 		s.Conn.Write([]byte("250 OK\r\n"))
 	case Includes(str, "RCPT TO"):
@@ -89,7 +91,8 @@ func (s *Server) handler(data *string, reader *bufio.Reader) {
 	case Includes(str, "QUIT"):
 		s.Conn.Write([]byte("221 Bye\r\n"))
 	default:
-		fmt.Println("Default")
+		s.Conn.Write([]byte("502 \r\n"))
+		fmt.Println("502")
 	}
 }
 
