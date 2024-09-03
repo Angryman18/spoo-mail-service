@@ -65,7 +65,7 @@ func (s *Server) loop() {
 		// _, err := conn.Read(data)
 		conn.Write([]byte("WELCOME TO SMTP SERVER"))
 		if err != nil {
-			fmt.Println("Connection Closed")
+			fmt.Println("Connection Closed", err)
 			return
 		}
 		go s.handler(&data)
