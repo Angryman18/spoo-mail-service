@@ -62,20 +62,18 @@ func (s *Server) loop() {
 		conn.Write([]byte("220 WELCOME TO SMTP SERVER\r\n"))
 		fmt.Println("Connected to ", conn.RemoteAddr().String()+"\n")
 		reader := bufio.NewReader(conn)
-
+		data, err := reader.ReadString('\n')
 		// _, err := conn.Read(data)
-
-		go s.handler(reader)
+		if err != nil {
+			fmt.Println("Connection Closed", err)
+			return
+		}
+		go s.handler(&data, reader)
 	}
 }
 
-func (s *Server) handler(reader *bufio.Reader) {
-	data, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("Connection Closed", err)
-		return
-	}
-	str := string(data)
+func (s *Server) handler(data *string, reader *bufio.Reader) {
+	str := string(*data)
 	fmt.Println(str)
 	switch {
 	case Includes(str, "HELO"):
