@@ -59,11 +59,11 @@ func (s *Server) loop() {
 	// data := make([]byte, 10)
 	conn := s.Conn
 	for {
+		conn.Write([]byte("220 WELCOME TO SMTP SERVER\r\n"))
 		fmt.Println("Connected to ", conn.RemoteAddr().String()+"\n")
 		info := bufio.NewReader(conn)
 		data, err := info.ReadString('\n')
 		// _, err := conn.Read(data)
-		conn.Write([]byte("220 WELCOME TO SMTP SERVER\r\n"))
 		if err != nil {
 			fmt.Println("Connection Closed", err)
 			return
