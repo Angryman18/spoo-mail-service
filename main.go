@@ -58,6 +58,7 @@ func (s *Server) loop() {
 	for {
 		fmt.Println("Connected to ", conn.RemoteAddr().String()+"\n")
 		_, err := conn.Read(data)
+		conn.Write([]byte("WELCOME TO SMTP SERVER"))
 		if err != nil {
 			fmt.Println("Connection Closed")
 			return
@@ -80,5 +81,7 @@ func (s *Server) handler(data *[]byte) {
 		s.Conn.Write([]byte("250 OK\r\n"))
 	case Includes(str, "QUIT"):
 		s.Conn.Write([]byte("221 Bye\r\n"))
+	default:
+
 	}
 }
