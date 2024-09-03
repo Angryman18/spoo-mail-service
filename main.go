@@ -79,6 +79,11 @@ func (s *Server) handler(data *string, reader *bufio.Reader) {
 	case Includes(str, "HELO") || Includes(str, "helo"):
 		s.Conn.Write([]byte("250 OK\r\n"))
 	case Includes(str, "EHLO") || Includes(str, "ehlo"):
+		s.Conn.Write([]byte("250-Hello\r\n"))
+		s.Conn.Write([]byte("250-SIZE 35882577\r\n")) // Maximum email size (~35 MB)
+		s.Conn.Write([]byte("250-PIPELINING\r\n"))    // Enable command pipelining
+		// s.Conn.Write([]byte("250-AUTH LOGIN PLAIN\r\n"))// Advertise AUTH (even if not required)
+		s.Conn.Write([]byte("250-8BITMIME\r\n")) // 8-bit MIME support
 		s.Conn.Write([]byte("250 OK\r\n"))
 	case Includes(str, "MAIL FROM"):
 		s.Conn.Write([]byte("250 OK\r\n"))
