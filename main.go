@@ -61,19 +61,21 @@ func (s *Server) loop() {
 	for {
 		conn.Write([]byte("220 WELCOME TO SMTP SERVER\r\n"))
 		fmt.Println("Connected to ", conn.RemoteAddr().String()+"\n")
-		info := bufio.NewReader(conn)
-		data, err := info.ReadString('\n')
+		reader := bufio.NewReader(conn)
+
 		// _, err := conn.Read(data)
-		if err != nil {
-			fmt.Println("Connection Closed", err)
-			return
-		}
-		go s.handler(&data)
+
+		go s.handler(reader)
 	}
 }
 
-func (s *Server) handler(data *string) {
-	str := string(*data)
+func (s *Server) handler(reader *bufio.Reader) {
+	data, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Println("Connection Closed", err)
+		return
+	}
+	str := string(data)
 	fmt.Println(str)
 	switch {
 	case Includes(str, "HELO"):
@@ -83,10 +85,32 @@ func (s *Server) handler(data *string) {
 	case Includes(str, "RCPT TO"):
 		s.Conn.Write([]byte("250 OK\r\n"))
 	case Includes(str, "DATA"):
-		s.Conn.Write([]byte("250 OK\r\n"))
+		s.Conn.Write([]byte("354 Start mail input; end with <CRLF>$$<CRLF>\r\n"))
+		handleData(reader, s.Conn)
 	case Includes(str, "QUIT"):
 		s.Conn.Write([]byte("221 Bye\r\n"))
 	default:
 		fmt.Println("Default")
 	}
+}
+
+func handleData(reader *bufio.Reader, conn net.Conn) {
+	var data strings.Builder
+
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			log.Printf("Failed to read email data: %v", err)
+			return
+		}
+
+		if line == "$$\r\n" {
+			break
+		}
+		data.WriteString(line)
+	}
+
+	// Process the email data here
+	log.Printf("Received email data:\n%s", data.String())
+	conn.Write([]byte("250 OK\r\n"))
 }
