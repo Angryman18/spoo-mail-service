@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -108,11 +109,15 @@ func handleData(reader *bufio.Reader, conn net.Conn) {
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
+			if err == io.EOF {
+				log.Println("Client closed connection prematurely")
+				break
+			}
 			log.Printf("Failed to read email data: %v", err)
 			return
 		}
 
-		if line == ".\r\n" {
+		if strings.TrimSpace(line) == "." {
 			break
 		}
 		data.WriteString(line)
