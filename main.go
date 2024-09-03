@@ -105,12 +105,12 @@ func (s *Server) handler(data *string, reader *bufio.Reader) {
 
 func handleData(reader *bufio.Reader, conn net.Conn) {
 	var data strings.Builder
-
+	var d string = ""
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
-				log.Println("Client closed connection prematurely")
+				log.Println("Client closed connection prematurely ", line)
 				break
 			}
 			log.Printf("Failed to read email data: %v", err)
@@ -121,9 +121,10 @@ func handleData(reader *bufio.Reader, conn net.Conn) {
 			break
 		}
 		data.WriteString(line)
+		d += line
 	}
 
 	// Process the email data here
-	log.Printf("Received email data:\n%s", data.String())
+	log.Printf("Received email data:\n%s %s", data.String(), d)
 	conn.Write([]byte("250 OK\r\n"))
 }
