@@ -109,7 +109,7 @@ func handleData(reader *bufio.Reader, conn net.Conn) {
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			log.Printf("Failed to read email data: %v", err)
-			continue
+			return
 		}
 
 		if line == ".\r\n" {
