@@ -74,7 +74,7 @@ func (s *Server) loop() {
 
 func (s *Server) handler(data *string, reader *bufio.Reader) {
 	str := string(*data)
-	fmt.Println(str)
+	fmt.Println("---> ", str)
 	switch {
 	case Includes(str, "HELO"):
 		s.Conn.Write([]byte("250 HELO\r\n"))
@@ -83,7 +83,8 @@ func (s *Server) handler(data *string, reader *bufio.Reader) {
 	case Includes(str, "RCPT TO"):
 		s.Conn.Write([]byte("250 OK\r\n"))
 	case Includes(str, "DATA"):
-		s.Conn.Write([]byte("354 Start mail input; end with <CRLF>$$<CRLF>\r\n"))
+		fmt.Println("DATA INVOKED ")
+		s.Conn.Write([]byte("354 Start mail input; end with <CRLF>.<CRLF>\r\n"))
 		handleData(reader, s.Conn)
 	case Includes(str, "QUIT"):
 		s.Conn.Write([]byte("221 Bye\r\n"))
@@ -102,7 +103,7 @@ func handleData(reader *bufio.Reader, conn net.Conn) {
 			return
 		}
 
-		if line == "$$\r\n" {
+		if line == ".\r\n" {
 			break
 		}
 		data.WriteString(line)
