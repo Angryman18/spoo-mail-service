@@ -145,10 +145,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
+	"net/mail"
 	"os"
 	"time"
 
@@ -168,30 +168,25 @@ func (bkd *Backend) NewSession(_ *smtp.Conn) (smtp.Session, error) {
 // Session is returned after EHLO.
 
 func (s *Session) Mail(from string, opts *smtp.MailOptions) error {
-	// fmt.Printf("to: %s, optns: %v", from, opts.RequireTLS)
 	return nil
 }
 
 func (s *Session) Rcpt(to string, rcp *smtp.RcptOptions) error {
-	// fmt.Printf("to: %s, optns: %s", to, rcp.OriginalRecipient)
 	return nil
 }
 
-type Data struct {
-	Received string
-	From     string
-	Subject  string
-}
-
 func (s *Session) Data(r io.Reader) error {
-	data, err := io.ReadAll(r)
-	var d Data
-	json.Unmarshal(data, &d)
+	// data, err := io.ReadAll(r)
+	// if err != nil {
+	// 	return err
+	// }
+
+	msg, err := mail.ReadMessage(r)
 	if err != nil {
 		return err
 	}
-	fmt.Println("MAIL DATA IN STRUCT ----> ", d)
-	log.Printf("Received mail:\n %s", string(data))
+	fmt.Println(msg)
+	// log.Printf("Received mail: %s", data)
 	return nil
 }
 
