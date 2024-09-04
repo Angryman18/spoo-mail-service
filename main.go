@@ -185,7 +185,12 @@ func (s *Session) Data(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(msg)
+
+	body, _ := io.ReadAll(msg.Body)
+	fmt.Println("BODY ----> ", body)
+
+	fmt.Printf("\n\nFrom %s", msg.Header.Get("From"))
+	fmt.Printf("\n\n Subject %s", msg.Header.Get("Subject"))
 	// log.Printf("Received mail: %s", data)
 	return nil
 }
