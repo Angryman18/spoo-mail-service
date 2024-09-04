@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
@@ -26,11 +27,13 @@ func main() {
 
 	connStr := fmt.Sprintf("%s:%s", host, port)
 
-	listener, err := net.Listen("tcp", connStr)
-	if err != nil {
-		log.Fatal("Error Opening a TCP Conection ", err)
-	}
-	defer listener.Close()
+	// listener, err := net.Listen("tcp", connStr)
+	// if err != nil {
+	// 	log.Fatal("Error Opening a TCP Conection ", err)
+	// }
+	// defer listener.Close()
+
+	listener := TlsConnectin(connStr)
 
 	fmt.Printf("Server has started at %s\n", connStr)
 
@@ -46,6 +49,20 @@ func main() {
 		go server.loop()
 	}
 
+}
+
+func TlsConnectin(s string) net.Listener {
+	cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
+	if err != nil {
+		log.Fatalf("error occured %v", err)
+	}
+	tlsConfig := tls.Config{Certificates: []tls.Certificate{cert}}
+
+	conn, err := tls.Listen("tcp", s, &tlsConfig)
+	if err != nil {
+		log.Fatalf("error listening for tls %v", err)
+	}
+	return conn
 }
 
 func LoadEnv() error {
