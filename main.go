@@ -65,10 +65,6 @@
 // 	return conn
 // }
 
-// func LoadEnv() error {
-// 	return godotenv.Load(".env")
-// }
-
 // func Includes(d, cmd string) bool {
 // 	return strings.Contains(d, cmd)
 // }
@@ -149,11 +145,14 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
+	"os"
 	"time"
 
 	"github.com/emersion/go-smtp"
+	"github.com/joho/godotenv"
 )
 
 type Backend struct{}
@@ -168,10 +167,12 @@ func (bkd *Backend) NewSession(_ *smtp.Conn) (smtp.Session, error) {
 // Session is returned after EHLO.
 
 func (s *Session) Mail(from string, opts *smtp.MailOptions) error {
+	fmt.Printf("to: %s, optns: %v", from, opts.RequireTLS)
 	return nil
 }
 
 func (s *Session) Rcpt(to string, rcp *smtp.RcptOptions) error {
+	fmt.Printf("to: %s, optns: %s", to, rcp.OriginalRecipient)
 	return nil
 }
 
@@ -180,7 +181,7 @@ func (s *Session) Data(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Received mail: %s", data)
+	log.Printf("Received mail:\n %s", string(data))
 	return nil
 }
 
@@ -190,27 +191,29 @@ func (s *Session) Logout() error {
 	return nil
 }
 
+func LoadEnv() error {
+	return godotenv.Load(".env")
+}
+
 func main() {
+
+	err := LoadEnv()
+	if err != nil {
+		panic("Error loading Env Variables")
+	}
+	port := os.Getenv("PORT")
+	host := os.Getenv("HOST")
+
 	be := &Backend{}
 	s := smtp.NewServer(be)
 
-	s.Addr = ":3000"
-	s.Domain = "0.0.0.0"
+	s.Addr = ":" + port
+	s.Domain = host
 	s.ReadTimeout = 10 * time.Second
 	s.WriteTimeout = 10 * time.Second
 	s.MaxMessageBytes = 1024 * 1024
 	s.MaxRecipients = 50
 	s.AllowInsecureAuth = true
-
-	// Load your certificate and key
-	// cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// s.TLSConfig = &tls.Config{
-	// 	Certificates: []tls.Certificate{cert},
-	// }
 
 	log.Println("Starting TLS server at 0.0.0.0:3000")
 	if err := s.ListenAndServe(); err != nil {
