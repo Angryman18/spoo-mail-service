@@ -59,8 +59,8 @@ func Includes(d, cmd string) bool {
 func (s *Server) loop() {
 	// data := make([]byte, 10)
 	conn := s.Conn
+	conn.Write([]byte("220 WELCOME TO SMTP SERVER\r\n"))
 	for {
-		conn.Write([]byte("220 WELCOME TO SMTP SERVER\r\n"))
 		fmt.Println("Connected to ", conn.RemoteAddr().String()+"\n")
 		reader := bufio.NewReader(conn)
 		// writer := bufio.NewWriter(conn)
