@@ -200,7 +200,7 @@ func main() {
 	s.WriteTimeout = 10 * time.Second
 	s.MaxMessageBytes = 1024 * 1024
 	s.MaxRecipients = 50
-	s.AllowInsecureAuth = false
+	s.AllowInsecureAuth = true
 
 	// Load your certificate and key
 	// cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
@@ -213,7 +213,7 @@ func main() {
 	// }
 
 	log.Println("Starting TLS server at 0.0.0.0:3000")
-	if err := s.ListenAndServeTLS(); err != nil {
+	if err := s.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
