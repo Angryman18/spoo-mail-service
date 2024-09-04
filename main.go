@@ -149,7 +149,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"io"
 	"log"
 	"time"
@@ -195,7 +194,7 @@ func main() {
 	be := &Backend{}
 	s := smtp.NewServer(be)
 
-	s.Addr = ":587"
+	s.Addr = ":3000"
 	s.Domain = "0.0.0.0"
 	s.ReadTimeout = 10 * time.Second
 	s.WriteTimeout = 10 * time.Second
@@ -204,16 +203,16 @@ func main() {
 	s.AllowInsecureAuth = false
 
 	// Load your certificate and key
-	cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	s.TLSConfig = &tls.Config{
-		Certificates: []tls.Certificate{cert},
-	}
+	// s.TLSConfig = &tls.Config{
+	// 	Certificates: []tls.Certificate{cert},
+	// }
 
-	log.Println("Starting TLS server at 0.0.0.0:465")
+	log.Println("Starting TLS server at 0.0.0.0:3000")
 	if err := s.ListenAndServeTLS(); err != nil {
 		log.Fatal(err)
 	}
